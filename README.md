@@ -57,3 +57,14 @@ npm run build
 ## Licencia
 
 MIT · [Daniel Buitrago](https://github.com/danielbuitragoh)
+
+
+---
+
+## English
+
+A web dashboard tracking the Colombian peso, Mexican peso, Brazilian real, Chilean peso and the US dollar against the euro, with central-bank reference rates and a same-day converter.
+
+The real problem is not drawing five lines, it is that they are not comparable on the same scale: the Colombian peso sits around 3,600 per euro and the dollar around 1.15, so a naive chart just has one line flatten the rest. All five series are indexed to base 100 on the first day of the period, on a single Y axis, because two Y axes on one chart invent a correlation that is not in the data. The app is fully static, no server and no cold starts, because the Frankfurter API allows CORS from the browser directly, and it consumes my own frankfurter-ts package for caching, retries and money arithmetic. Colors are validated for colorblind-safe separation and contrast in both light and dark mode, every chart has a data table underneath for screen readers, and the error screen is a first-class state, not an afterthought, because the API's measured uptime is only around 86%.
+
+Code and comments are in Spanish.
