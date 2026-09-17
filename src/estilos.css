@@ -1,0 +1,269 @@
+/* ===================================================================
+   Panel de divisas · sistema visual
+
+   La interfaz es monocroma a propósito: así el ÚNICO color de la
+   pantalla es el de los datos. Cuando el cromo compite en color con
+   las series, el lector deja de saber qué significa un color.
+
+   Los colores de serie no están elegidos a ojo: pasan un validador
+   de daltonismo, contraste y bandas de luminosidad en los dos modos.
+   =================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* superficies e tinta */
+  --plano:            #f9f9f7;
+  --superficie:       #fcfcfb;
+  --superficie-alta:  #f2f2ef;
+  --tinta:            #0b0b0b;
+  --tinta-2:          #52514e;
+  --tinta-3:          #898781;
+  --borde:            rgba(11, 11, 11, .10);
+  --rejilla:          #e1e0d9;
+  --eje:              #c3c2b7;
+
+  /* series · orden FIJO, nunca se cicla ni se reordena al filtrar */
+  --serie-1: #2a78d6;   /* azul     */
+  --serie-2: #eb6834;   /* naranja  */
+  --serie-3: #1baf7a;   /* aqua     */
+  --serie-4: #eda100;   /* amarillo */
+  --serie-5: #e87ba4;   /* magenta  */
+
+  /* estados · reservados, jamás como color de serie */
+  --bien:    #0ca30c;
+  --critico: #d03b3b;
+
+  --fuente: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --mono:   "JetBrains Mono", ui-monospace, monospace;
+  --curva:  cubic-bezier(.22, 1, .36, 1);
+  --radio:  12px;
+}
+
+/* El modo oscuro se ELIGE, no se invierte: bajar el brillo de los
+   colores claros produce tonos sucios. Cada valor está escogido para
+   su fondo y validado contra él. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --plano:           #0d0d0d;
+    --superficie:      #1a1a19;
+    --superficie-alta: #232321;
+    --tinta:           #ffffff;
+    --tinta-2:         #c3c2b7;
+    --tinta-3:         #898781;
+    --borde:           rgba(255, 255, 255, .10);
+    --rejilla:         #2c2c2a;
+    --eje:             #383835;
+    --serie-1: #3987e5;
+    --serie-2: #d95926;
+    --serie-3: #199e70;
+    --serie-4: #c98500;
+    --serie-5: #d55181;
+  }
+}
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --plano:           #0d0d0d;
+  --superficie:      #1a1a19;
+  --superficie-alta: #232321;
+  --tinta:           #ffffff;
+  --tinta-2:         #c3c2b7;
+  --tinta-3:         #898781;
+  --borde:           rgba(255, 255, 255, .10);
+  --rejilla:         #2c2c2a;
+  --eje:             #383835;
+  --serie-1: #3987e5;
+  --serie-2: #d95926;
+  --serie-3: #199e70;
+  --serie-4: #c98500;
+  --serie-5: #d55181;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--plano);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--tinta);
+  text-decoration-color: var(--eje);
+  text-underline-offset: 3px;
+}
+a:hover { text-decoration-color: currentColor; }
+
+:focus-visible { outline: 2px solid var(--tinta); outline-offset: 3px; border-radius: 4px; }
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- estructura ---------- */
+.marco { max-width: 1180px; margin: 0 auto; padding: clamp(20px, 4vw, 44px); }
+
+.cabecera { margin-bottom: 28px; }
+.cabecera h1 {
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  font-weight: 600; letter-spacing: -.02em; line-height: 1.12;
+}
+.cabecera p { color: var(--tinta-2); max-width: 62ch; margin-top: 8px; }
+.cabecera .fila { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+
+/* ---------- controles: UNA fila encima de los gráficos ---------- */
+.mandos {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 12px 0 18px; border-bottom: 1px solid var(--borde); margin-bottom: 22px;
+}
+.grupo { display: flex; gap: 4px; background: var(--superficie-alta); padding: 3px; border-radius: 999px; }
+.grupo button {
+  font: inherit; font-size: 13px; border: 0; background: transparent; color: var(--tinta-2);
+  padding: 6px 13px; border-radius: 999px; cursor: pointer;
+  transition: background .2s var(--curva), color .2s var(--curva);
+}
+.grupo button:hover { color: var(--tinta); }
+.grupo button[aria-pressed="true"] { background: var(--superficie); color: var(--tinta); font-weight: 500; }
+
+.pildora {
+  font: inherit; font-size: 13px; cursor: pointer;
+  border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta-2);
+  padding: 7px 13px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: border-color .2s var(--curva), color .2s var(--curva);
+}
+.pildora:hover { border-color: var(--eje); color: var(--tinta); }
+.pildora[aria-pressed="true"] { border-color: currentColor; color: var(--tinta); font-weight: 500; }
+.punto { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+.separador { flex: 1; }
+
+/* ---------- tarjetas de variación ---------- */
+.tarjetas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 12px; margin-bottom: 26px;
+}
+.tarjeta {
+  background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: var(--radio); padding: 15px 17px;
+}
+.tarjeta .nombre {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--tinta-3); display: flex; align-items: center; gap: 7px;
+}
+.tarjeta .valor { font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; margin: 7px 0 3px; }
+.tarjeta .delta { font-size: 13px; }
+/* La flecha y el signo van SIEMPRE junto al número: el color no puede ser el
+   único portador del significado (el 8% de los hombres no lo distingue), y va
+   dentro del flujo de texto y no como caja flex aparte porque en pantallas
+   estrechas la línea se parte y la flecha quedaba huérfana. */
+.tarjeta .delta .flecha { font-size: 10px; margin-right: 3px; }
+.delta.sube { color: var(--bien); }
+.delta.baja { color: var(--critico); }
+.delta.igual { color: var(--tinta-3); }
+
+/* ---------- paneles de gráfico ---------- */
+.panel {
+  background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: var(--radio); padding: 20px; margin-bottom: 20px;
+}
+.panel > header { margin-bottom: 4px; }
+.panel h2 { font-size: 1.02rem; font-weight: 600; letter-spacing: -.01em; }
+.panel .explica { color: var(--tinta-2); font-size: 13.5px; margin-top: 3px; max-width: 70ch; }
+
+.leyenda { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 0 4px; }
+.leyenda span { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--tinta-2); }
+
+/* ---------- estados ---------- */
+.esqueleto {
+  background: linear-gradient(90deg, var(--superficie-alta) 25%, var(--rejilla) 37%, var(--superficie-alta) 63%);
+  background-size: 400% 100%; animation: brillo 1.3s ease-in-out infinite; border-radius: 8px;
+}
+@keyframes brillo { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.aviso {
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  padding: 26px; text-align: center; background: var(--superficie);
+}
+.aviso h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+.aviso p { color: var(--tinta-2); font-size: 14px; max-width: 46ch; margin: 0 auto 14px; }
+.boton {
+  font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--tinta); background: transparent; color: var(--tinta);
+  padding: 9px 18px; border-radius: 999px;
+  transition: background .2s var(--curva), color .2s var(--curva);
+}
+.boton:hover { background: var(--tinta); color: var(--superficie); }
+
+.nota-caducada {
+  font-family: var(--mono); font-size: 11.5px; color: var(--tinta-3);
+  display: flex; align-items: center; gap: 7px; margin-top: 12px;
+}
+
+/* ---------- conversor ---------- */
+.conversor { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.campo { display: flex; flex-direction: column; gap: 5px; }
+.campo label { font-size: 12px; color: var(--tinta-2); font-weight: 500; }
+.campo input, .campo select {
+  font: inherit; font-size: 15px; color: var(--tinta);
+  background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: 9px; padding: 9px 12px; min-width: 116px;
+}
+.campo input { font-variant-numeric: tabular-nums; }
+.resultado {
+  font-size: 1.45rem; font-weight: 600; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; padding-bottom: 7px;
+}
+.resultado small { display: block; font-size: 12px; font-weight: 400; color: var(--tinta-3); letter-spacing: 0; }
+
+/* ---------- tabla: la alternativa accesible al gráfico ---------- */
+details.tabla { margin-top: 16px; }
+details.tabla > summary {
+  cursor: pointer; font-size: 13px; color: var(--tinta-2);
+  padding: 7px 0; user-select: none;
+}
+details.tabla > summary:hover { color: var(--tinta); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--borde); }
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--tinta-3); font-weight: 500;
+  position: sticky; top: 0; background: var(--superficie);
+}
+td { font-variant-numeric: tabular-nums; color: var(--tinta-2); }
+.envoltorio-tabla { max-height: 320px; overflow: auto; border: 1px solid var(--borde); border-radius: 9px; }
+
+/* ---------- pie ---------- */
+.pie {
+  margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--borde);
+  font-size: 12.5px; color: var(--tinta-3);
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.pie a { color: var(--tinta-2); }
+
+/* ---------- tooltip del gráfico ---------- */
+.globo {
+  background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: 9px; padding: 10px 12px; font-size: 13px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .10);
+}
+.globo .fecha {
+  font-family: var(--mono); font-size: 11px; color: var(--tinta-3);
+  margin-bottom: 7px; letter-spacing: .04em;
+}
+.globo ul { list-style: none; display: grid; gap: 4px; }
+.globo li { display: flex; align-items: center; gap: 8px; }
+/* El texto usa tokens de tinta, NUNCA el color de la serie: el punto
+   de color que va al lado ya carga con la identidad. */
+.globo li b { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--tinta); }
+.globo li span { color: var(--tinta-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
