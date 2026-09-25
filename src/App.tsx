@@ -32,11 +32,10 @@ export default function App() {
     });
   }
 
-  function cambiarTema() {
-    const siguiente = tema === 'auto' ? 'claro' : tema === 'claro' ? 'oscuro' : 'auto';
-    setTema(siguiente);
-    if (siguiente === 'auto') document.documentElement.removeAttribute('data-tema');
-    else document.documentElement.setAttribute('data-tema', siguiente);
+  function elegirTema(nuevo: 'auto' | 'claro' | 'oscuro') {
+        setTema(nuevo);
+        if (nuevo === 'auto') document.documentElement.removeAttribute('data-tema');
+        else document.documentElement.setAttribute('data-tema', nuevo);
   }
 
   return (
@@ -51,9 +50,13 @@ export default function App() {
               el cliente que escribí para esta API.
             </p>
           </div>
-          <button className="pildora" onClick={cambiarTema}>
-            Tema: {tema === 'auto' ? 'del sistema' : tema}
-          </button>
+                    <div className="grupo" role="group" aria-label="Tema">
+                      {(['auto', 'claro', 'oscuro'] as const).map((t) => (
+                    <button key={t} onClick={() => elegirTema(t)} aria-pressed={tema === t}>
+                      {t === 'auto' ? 'Sistema' : t === 'claro' ? 'Claro' : 'Oscuro'}
+                    </button>
+                  ))}
+                    </div>
         </div>
       </header>
 
