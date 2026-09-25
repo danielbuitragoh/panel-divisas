@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MONEDAS, RANGOS, BASE } from './datos/monedas';
 import { usarSerie, indexar } from './datos/usarSerie';
 import { Grafico } from './componentes/Grafico';
@@ -10,7 +10,15 @@ export default function App() {
   const [visibles, setVisibles] = useState<Set<string>>(
     () => new Set(MONEDAS.map((m) => m.codigo)),
   );
-  const [tema, setTema] = useState<'auto' | 'claro' | 'oscuro'>('auto');
+  const [tema, setTema] = useState<'claro' | 'oscuro'>(() =>
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'oscuro'
+      : 'claro',
+  );
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-tema', tema);
+  }, [tema]);
 
   const { datos, cargando, error, caducado, reintentar } = usarSerie(rango);
   const codigos = useMemo(
@@ -32,10 +40,8 @@ export default function App() {
     });
   }
 
-  function elegirTema(nuevo: 'auto' | 'claro' | 'oscuro') {
-        setTema(nuevo);
-        if (nuevo === 'auto') document.documentElement.removeAttribute('data-tema');
-        else document.documentElement.setAttribute('data-tema', nuevo);
+  function alternarTema() {
+    setTema((actual) => (actual === 'claro' ? 'oscuro' : 'claro'));
   }
 
   return (
@@ -50,13 +56,9 @@ export default function App() {
               el cliente que escribí para esta API.
             </p>
           </div>
-                    <div className="grupo" role="group" aria-label="Tema">
-                      {(['auto', 'claro', 'oscuro'] as const).map((t) => (
-                    <button key={t} onClick={() => elegirTema(t)} aria-pressed={tema === t}>
-                      {t === 'auto' ? 'Sistema' : t === 'claro' ? 'Claro' : 'Oscuro'}
-                    </button>
-                  ))}
-                    </div>
+          <button className="pildora" onClick={alternarTema} aria-pressed={tema === 'oscuro'}>
+            Tema: {tema === 'claro' ? 'claro' : 'oscuro'}
+          </button>
         </div>
       </header>
 
